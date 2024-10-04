@@ -116,7 +116,7 @@ class Woo_Conditional_Payments_Debug {
         'result' => false,
       ];
 
-      foreach ( $ruleset->get_conditions() as $index => $condition ) {
+      foreach ( $ruleset->get_conditions( true ) as $index => $condition ) {
         $this->add_condition( $ruleset->get_id(), $index, $condition, false );
       }
 
@@ -363,6 +363,8 @@ class Woo_Conditional_Payments_Debug {
       case 'woolab_billing_dic':
       case 'woolab_billing_dic_dph':
         return null;
+      case 'ip_address':
+        return $this->convert_list( $condition['ip_addresses'] );
       default:
         return 'N/A';
     }

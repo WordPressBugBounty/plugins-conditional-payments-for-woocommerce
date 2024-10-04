@@ -179,6 +179,10 @@
   display: block;
 }
 
+.woocommerce table.form-table table.wcp-table tr.wcp-type-ip_address .wcp_ip_address_value_input {
+  display: block;
+}
+
 .woocommerce table.form-table table.wcp-table tr.wcp-type-billing_first_name.wcp-operator-contains .wcp_text_value_input {
   display: block;
 }
@@ -320,7 +324,7 @@
   font-style: italic;
 }
 
-.woocommerce table.form-table table.wcp-table .wcp_postcode_value_input .description {
+.woocommerce table.form-table table.wcp-table .value_input .description {
   font-size: .9em;
   color: #999;
   font-style: italic;

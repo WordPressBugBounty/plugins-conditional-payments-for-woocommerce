@@ -42,7 +42,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 										<?php echo esc_html( $ruleset->get_title() ); ?>
 									</a>
 									<div class="wcp-row-actions">
-										<a href="<?php echo esc_attr( $ruleset->get_admin_edit_url() ); ?>"><?php esc_html_e( 'Edit', 'woo-conditional-payments' ); ?></a> | <a href="<?php echo esc_attr( $ruleset->get_admin_delete_url() ); ?>" class="wcp-ruleset-delete"><?php esc_html_e( 'Delete', 'woo-conditional-payments' ); ?></a>
+										<?php foreach ( $ruleset->get_row_actions() as $key => $action ) { ?>
+											<span>
+												<a href="<?php echo esc_attr( $action['url'] ); ?>" class="<?php echo esc_attr( $action['class'] ); ?>">
+													<?php echo esc_html( $action['title'] ); ?>
+												</a>
+											</span>
+
+											<?php if ( $key !== 'clone' ) { ?>
+												<span>|</span>
+											<?php } ?>
+										<?php } ?>
 									</div>
 								</td>
 								<td class="wcp-ruleset-status">

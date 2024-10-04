@@ -160,10 +160,6 @@ jQuery(document).ready(function($) {
 			for ( var i = 0; i < this.conditions.length; i++ ) {
 				this.addCondition( this.conditions[i] );
 			}
-
-			$( document.body ).trigger( 'wc-enhanced-select-init' );
-
-			this.toggleAllValueInputs();
 		},
 
 		/**
@@ -173,19 +169,6 @@ jQuery(document).ready(function($) {
 			if ( $( 'tbody tr', this.table ).length == 0 ) {
 				this.addCondition( {} );
 			}
-		},
-
-		/**
-		 * Toggle all value inputs
-		 */
-		toggleAllValueInputs: function() {
-			var self = this;
-
-			$( 'tbody tr', this.table ).each( function() {
-				self.toggleOperators( $( this ) );
-				self.toggleValueInputs( $( this ) );
-				self.toggleMatchByName( $( this ) );
-			});
 		},
 
 		/**
@@ -322,7 +305,10 @@ jQuery(document).ready(function($) {
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
 
-			this.toggleAllValueInputs();
+			let addedRow = $( 'tbody tr:last-child', this.table );
+			this.toggleOperators( addedRow );
+			this.toggleValueInputs( addedRow );
+			this.toggleMatchByName( addedRow );
 		},
 
 		/**
@@ -419,10 +405,6 @@ jQuery(document).ready(function($) {
 			for ( var i = 0; i < this.actions.length; i++ ) {
 				this.addAction( this.actions[i] );
 			}
-
-			$( document.body ).trigger( 'wc-enhanced-select-init' );
-
-			this.toggleAllValueInputs();
 		},
 
 		/**
@@ -432,17 +414,6 @@ jQuery(document).ready(function($) {
 			if ( $( 'tbody tr', this.table ).length == 0 ) {
 				this.addAction( {} );
 			}
-		},
-
-		/**
-		 * Toggle all value inputs
-		 */
-		toggleAllValueInputs: function() {
-			var self = this;
-
-			$( 'tbody tr', this.table ).each( function() {
-				self.toggleValueInputs( $( this ) );
-			});
 		},
 
 		/**
@@ -478,7 +449,8 @@ jQuery(document).ready(function($) {
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
 
-			this.toggleAllValueInputs();
+			let addedRow = $( 'tbody tr:last-child', this.table );
+			this.toggleValueInputs( addedRow );
 		},
 
 		/**

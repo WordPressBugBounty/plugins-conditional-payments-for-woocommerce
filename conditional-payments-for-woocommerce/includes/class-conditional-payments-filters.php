@@ -313,6 +313,8 @@ class Woo_Conditional_Payments_Filters {
 	 */
 	public static function _compare_numeric_value( $a, $b, $operator ) {
 		switch ( $operator ) {
+			case 'e':
+				return round( floatval( $a ), wc_get_price_decimals() ) == round( floatval( $b ), wc_get_price_decimals() );
 			case 'gt':
 				return $a > $b;
 			case 'gte':

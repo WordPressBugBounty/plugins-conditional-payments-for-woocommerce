@@ -90,6 +90,7 @@ function woo_conditional_payments_operators() {
     'gte' => __( 'greater than or equal', 'woo-conditional-payments' ),
     'lt' => __( 'less than', 'woo-conditional-payments' ),
     'lte' => __( 'less than or equal', 'woo-conditional-payments' ),
+    'e' => __( 'equals', 'woo-conditional-payments' ),
     'in' => __( 'include', 'woo-conditional-payments' ),
     'exclusive' => __( 'include only', 'woo-conditional-payments' ),
     'notin' => __( 'exclude', 'woo-conditional-payments' ),
@@ -129,7 +130,7 @@ function woo_conditional_payments_filter_groups() {
       'filters' => array(
         'subtotal' => array(
           'title' => __( 'Order Subtotal', 'woo-conditional-payments' ),
-          'operators' => array( 'gt', 'gte', 'lt', 'lte' ),
+          'operators' => array( 'gt', 'gte', 'lt', 'lte', 'e' ),
         ),
         'shipping_method' => array(
           'title' => __( 'Shipping Method', 'woo-conditional-payments' ),
@@ -137,7 +138,7 @@ function woo_conditional_payments_filter_groups() {
         ),
         'items' => array(
           'title' => __( 'Number of Items', 'woo-conditional-payments' ),
-          'operators' => array( 'gt', 'gte', 'lt', 'lte' ),
+          'operators' => array( 'gt', 'gte', 'lt', 'lte', 'e' ),
           'pro' => true,
         ),
         'coupon' => array(
@@ -288,9 +289,14 @@ function woo_conditional_payments_filter_groups() {
         ),
         'orders' => array(
           'title' => __( 'Previous orders', 'woo-conditional-payments' ),
-          'operators' => array( 'gt', 'gte', 'lt', 'lte' ),
+          'operators' => array( 'gt', 'gte', 'lt', 'lte', 'e' ),
           'pro' => true,
         ),
+        'ip_address' => [
+          'title' => __( 'IP address', 'woo-conditional-payments' ),
+          'operators' => [ 'is', 'isnot' ],
+          'pro' => true,
+        ],
         'vat_exempt' => [
           'title' => __( 'VAT exempt', 'woo-conditional-payments' ),
           'operators' => [ 'is', 'isnot' ],
@@ -384,7 +390,7 @@ function woo_conditional_payments_filter_groups() {
     'filters' => [
       'date' => [
         'title' => __( 'Date', 'woo-conditional-payments' ),
-        'operators' => [ 'gt', 'gte', 'lt', 'lte' ],
+        'operators' => [ 'gt', 'gte', 'lt', 'lte', 'e' ],
         'pro' => true,
       ],
       'time' => [
@@ -631,16 +637,14 @@ function woo_conditional_payments_get_shipping_method_options() {
  * Get shipping method name by rate ID
  */
 function wcp_get_shipping_method_title_by_id( $shipping_method ) {
-  $options = woo_conditional_payments_get_shipping_method_options();
-
-  foreach ( $options as $zone ) {
-    foreach ( $zone['methods'] as $method ) {
-      if (
-        ( $shipping_method['rate_id'] && $method['rate_id'] == $shipping_method['rate_id'] )
-        ||
-        ( $shipping_method['instance_id'] && $method['instance_id'] == $shipping_method['instance_id'] )
-      ) {
-        return $method['title'];
+  // Rates are stored in session
+  if ( WC()->session && is_callable( [ WC()->session, 'get' ] ) ) {
+    $shipping = WC()->session->get( 'shipping_for_package_0' );
+    if ( is_array( $shipping ) && isset( $shipping['rates'] ) && is_array( $shipping['rates'] ) ) {
+      foreach ( $shipping['rates'] as $rate_id => $rate ) {
+        if ( $rate_id && $rate_id === $shipping_method['rate_id'] && is_a( $rate, 'WC_Shipping_Rate' ) ) {
+          return $rate->get_label();
+        }
       }
     }
   }
@@ -1028,5 +1032,24 @@ function wcp_time_mins_options() {
   }
 
   return $options;
+}
+
+/**
+ * Check if WPML has translatable strings for this plugin
+ */
+function wcp_wpml_has_strings() {
+  if ( function_exists( 'icl_st_get_contexts' ) ) {
+    $contexts = icl_st_get_contexts( false );
+
+    if ( is_array( $contexts ) ) {
+      foreach ( $contexts as $context ) {
+        if ( is_object( $context ) && isset( $context->context ) && $context->context === 'Conditional Payments for WooCommerce' ) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 

@@ -29,6 +29,9 @@ class Woo_Conditional_Payments_Frontend {
       // Multicurrency support
       add_filter( 'wcp_convert_price', [ $this, 'convert_price' ], 10, 1 );
       add_filter( 'wcp_convert_price_reverse', [ $this, 'convert_price_reverse' ], 10, 1 );
+
+      // Store order ID that's being currently processed
+      add_action( 'woocommerce_checkout_order_processed', [ $this, 'store_order_id' ], 10, 1 );
     }
 
     add_action( 'woocommerce_blocks_loaded', [ $this, 'register_blocks_support' ], 10, 0 );
@@ -128,6 +131,15 @@ class Woo_Conditional_Payments_Frontend {
         'readonly' => true,
       ],
     ];
+  }
+
+  /**
+   * Store order ID that's being currently processed
+   */
+  public function store_order_id( $order_id ) {
+    if ( $order_id ) {
+      $GLOBALS['wcp_processing_order_id'] = $order_id;
+    }
   }
   
   /**

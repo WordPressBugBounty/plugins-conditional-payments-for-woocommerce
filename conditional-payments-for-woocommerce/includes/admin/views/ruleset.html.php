@@ -93,6 +93,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</tr>
 					</tfoot>
 				</table>
+
+				<?php if ( wcp_wpml_has_strings() ) { ?>
+					<p><small><a href="<?php echo admin_url( 'admin.php?page=wpml-string-translation%2Fmenu%2Fstring-translation.php&context=Conditional+Payments+for+WooCommerce' ); ?>" target="_blank"><?php esc_html_e( 'Translate strings with WPML', 'woo-conditional-payments' ); ?> &raquo;</a></small></p>
+				<?php } ?>
 			</td>
 		</tr>
 		<?php if ( ! class_exists( 'Woo_Conditional_Payments_Pro' ) ) { ?>
@@ -162,6 +166,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<textarea name="wcp_conditions[{{data.index}}][postcodes]" class="" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>">{{ data.postcodes }}</textarea>
 
 				<div class="description"><?php esc_html_e( 'Postcodes containing wildcards (e.g. CB23*) or fully numeric ranges (e.g. <code>90210...99000</code>) are also supported.', 'woo-conditional-payments' ); ?></div>
+			</div>
+
+			<div class="value_input wcp_ip_address_value_input">
+				<textarea name="wcp_conditions[{{data.index}}][ip_addresses]" class="" placeholder="<?php esc_attr_e( 'List 1 IP address per line', 'woocommerce' ); ?>">{{ data.ip_addresses }}</textarea>
+
+				<div class="description"><?php esc_html_e( 'IP addresses containing wildcards (e.g. 127.0.0.*) or ranges (e.g. 127.0.0.0-127.255.255.255) are also supported.', 'woo-conditional-payments' ); ?></div>
 			</div>
 
 			<div class="value_input wcp_billing_email_value_input">
@@ -459,6 +469,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</option>
 				<?php } ?>
 			</select>
+
+			<input type="hidden" name="wcp_actions[{{data.index}}][guid]" value="{{ data.guid }}" />
 		</td>
 		<td class="wcp-methods">
 			<select name="wcp_actions[{{data.index}}][payment_method_ids][]" multiple class="select wc-enhanced-select" data-placeholder="<?php echo esc_attr( __( 'Select payment methods', 'woo-conditional-payments' ) ); ?>">

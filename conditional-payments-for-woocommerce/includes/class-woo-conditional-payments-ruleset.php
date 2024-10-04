@@ -60,6 +60,29 @@ class Woo_Conditional_Payments_Ruleset {
   }
 
   /**
+   * Get row actions
+   */
+  public function get_row_actions() {
+    return [
+      'edit' => [
+        'title' => __( 'Edit', 'woo-conditional-payments' ),
+        'url' => $this->get_admin_edit_url(),
+        'class' => 'wcp-ruleset-edit',
+      ],
+      'delete' => [
+        'title' => __( 'Delete', 'woo-conditional-payments' ),
+        'url' => $this->get_admin_delete_url(),
+        'class' => 'wcp-ruleset-delete',
+      ],
+      'clone' => [
+        'title' => __( 'Duplicate', 'woo-conditional-payments' ),
+        'url' => $this->get_admin_duplicate_url(),
+        'class' => 'wcp-ruleset-duplicate',
+      ],
+    ];
+  }
+
+  /**
    * Get admin edit URL
    */
   public function get_admin_edit_url() {
@@ -78,6 +101,18 @@ class Woo_Conditional_Payments_Ruleset {
       'ruleset_id' => $this->post_id,
       'action' => 'delete',
     ), admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments' ) );
+
+    return $url;
+  }
+
+  /**
+   * Get admin duplicate URL
+   */
+  public function get_admin_duplicate_url() {
+    $url = add_query_arg( [
+      'ruleset_id' => $this->post_id,
+      'action' => 'duplicate',
+    ], admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments' ) );
 
     return $url;
   }
@@ -173,14 +208,26 @@ class Woo_Conditional_Payments_Ruleset {
   /**
    * Get conditions for the ruleset
    */
-  public function get_conditions() {
+  public function get_conditions( $skip_empty = false ) {
     $conditions = get_post_meta( $this->post_id, '_wcp_conditions', true );
 
     if ( ! $conditions ) {
       return array();
     }
 
-    return (array) $conditions;
+    $conditions = (array) $conditions;
+
+    if ( $skip_empty ) {
+      foreach ( $conditions as $key => $condition ) {
+        if ( ! isset( $condition['type'] ) || empty( $condition['type'] ) ) {
+          unset( $conditions[$key] );
+        }
+      }
+
+      $conditions = array_values( $conditions );
+    }
+
+    return $conditions;
   }
 
   /**
@@ -216,22 +263,20 @@ class Woo_Conditional_Payments_Ruleset {
     $filters = woo_conditional_payments_filters();
 
     $results = [];
-    foreach ( $this->get_conditions() as $index => $condition ) {
-      if ( isset( $condition['type'] ) && ! empty( $condition['type'] ) ) {
-        $function = "filter_{$condition['type']}";
+    foreach ( $this->get_conditions( true ) as $index => $condition ) {
+      $function = "filter_{$condition['type']}";
 
-        if ( isset( $filters[$condition['type']] ) && isset( $filters[$condition['type']]['callback'] ) ) {
-          $callable = $filters[$condition['type']]['callback'];
-        } else if ( class_exists( 'Woo_Conditional_Payments_Filters_Pro' ) && method_exists( 'Woo_Conditional_Payments_Filters_Pro', $function ) ) {
-          $callable = array( 'Woo_Conditional_Payments_Filters_Pro', "filter_{$condition['type']}" );
-        } else {
-          $callable = array( 'Woo_Conditional_Payments_Filters', "filter_{$condition['type']}" );
-        }
-
-        $results[$index] = (bool) call_user_func( $callable, $condition );
-
-        $this->debug->add_condition( $this->get_id(), $index, $condition, $results[$index] );
+      if ( isset( $filters[$condition['type']] ) && isset( $filters[$condition['type']]['callback'] ) ) {
+        $callable = $filters[$condition['type']]['callback'];
+      } else if ( class_exists( 'Woo_Conditional_Payments_Filters_Pro' ) && method_exists( 'Woo_Conditional_Payments_Filters_Pro', $function ) ) {
+        $callable = array( 'Woo_Conditional_Payments_Filters_Pro', "filter_{$condition['type']}" );
+      } else {
+        $callable = array( 'Woo_Conditional_Payments_Filters', "filter_{$condition['type']}" );
       }
+
+      $results[$index] = (bool) call_user_func( $callable, $condition );
+
+      $this->debug->add_condition( $this->get_id(), $index, $condition, $results[$index] );
     }
 
     // If operator is OR, it is enough that one condition passed

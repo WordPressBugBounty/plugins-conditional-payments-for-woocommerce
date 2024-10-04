@@ -21,6 +21,9 @@ class Woo_Conditional_Payments_Admin {
 
     // Add admin JS
     add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+
+    // Dequeue scripts
+    add_action( 'admin_footer', [ $this, 'admin_dequeue_scripts' ], 100, 0 );
     
     // Add plugin links
     add_filter( 'plugin_action_links_' . WOO_CONDITIONAL_PAYMENTS_BASENAME, array( $this, 'add_plugin_links' ) );
@@ -87,7 +90,21 @@ class Woo_Conditional_Payments_Admin {
       ]
     ] );
   }
-  
+
+  /**
+   * Dequeue scripts
+   */
+  public function admin_dequeue_scripts() {
+    // Only run on Conditional Payments page
+    if ( ! isset( $_GET['section'], $_GET['ruleset_id'] ) || $_GET['section'] !== 'woo_conditional_payments' || empty( $_GET['ruleset_id'] ) ) {
+      return;
+    }
+
+    // Dequeue WooCommerce admin settings because its editPrompt
+    // decreases performance when clicking 'Add condition'
+    wp_dequeue_script( 'woocommerce_settings' );
+  }
+
   /**
    * Register section under "Payments" settings in WooCommerce
    */
@@ -104,44 +121,90 @@ class Woo_Conditional_Payments_Admin {
     global $current_section;
     global $hide_save_button;
 
-    if ( 'woo_conditional_payments' === $current_section ) {
-			if ( isset( $_REQUEST['ruleset_id'] ) ) {
-        $hide_save_button = true;
-
-        if ( $_REQUEST['ruleset_id'] === 'new' ) {
-          $ruleset_id = false;
-        } else {
-          $ruleset_id = wc_clean( wp_unslash( $_REQUEST['ruleset_id'] ) );
-        }
-
-        if ( $ruleset_id && isset( $_REQUEST['action'] ) && 'delete' === $_REQUEST['action'] ) {
-					wp_delete_post( $ruleset_id, false );
-					
-					// Clear cache
-					delete_transient( 'wcp_name_address_fields' );
-
-          $url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments' );
-          wp_safe_redirect( $url );
-          exit;
-        }
-
-        $ruleset = new Woo_Conditional_Payments_Ruleset( $ruleset_id );
-
-        include 'views/ruleset.html.php';
-      } else {
-        $hide_save_button = true;
-
-        $health = $this->health_check();
-
-        $add_ruleset_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments&ruleset_id=new' );
-
-        $rulesets = woo_conditional_payments_get_rulesets();
-
-        $disable_sortable = apply_filters( 'wcp_disable_sortable', false );
-        
-        include apply_filters( 'wcp_settings_tmpl', 'views/settings.html.php' );
-      }
+    if ( 'woo_conditional_payments' !== $current_section ) {
+      return;
     }
+
+    $action = isset( $_GET['action'] ) ? $_GET['action'] : false;
+    $ruleset_id = isset( $_GET['ruleset_id'] ) ? $_GET['ruleset_id'] : false;
+    $hide_save_button = true;
+
+    if ( $ruleset_id ) {
+      if ( $ruleset_id === 'new' ) {
+        $ruleset_id = false;
+      } else {
+        $ruleset_id = absint( wc_clean( wp_unslash( $ruleset_id ) ) );
+      }
+
+      // Delete ruleset
+      if ( $ruleset_id && 'delete' === $action ) {
+        wp_delete_post( $ruleset_id, false );
+
+        // Clear cache
+        delete_transient( 'wcp_name_address_fields' );
+
+        $url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments' );
+        wp_safe_redirect( $url );
+        exit;
+      }
+
+      // Duplicate ruleset
+      if ( $ruleset_id && 'duplicate' === $action ) {
+        $cloned_ruleset_id = $this->clone_ruleset( $ruleset_id );
+
+        wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments&ruleset_id=' . $cloned_ruleset_id ) );
+        exit;
+      }
+
+      $ruleset = new Woo_Conditional_Payments_Ruleset( $ruleset_id );
+
+      include 'views/ruleset.html.php';
+    } else {
+      $health = $this->health_check();
+
+      $add_ruleset_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments&ruleset_id=new' );
+
+      $rulesets = woo_conditional_payments_get_rulesets();
+
+      $disable_sortable = apply_filters( 'wcp_disable_sortable', false );
+      
+      include apply_filters( 'wcp_settings_tmpl', 'views/settings.html.php' );
+    }
+  }
+
+  /**
+   * Clone ruleset
+   */
+  public function clone_ruleset( $ruleset_id ) {
+    $ruleset = get_post( $ruleset_id );
+
+    $post_id = wp_insert_post( [
+      'post_type' => 'wcp_ruleset',
+      'post_title' => sprintf( __( '%s (Clone)', 'woo-conditional-payments' ), $ruleset->post_title ),
+      'post_status' => 'publish',
+    ] );
+
+    $meta_keys = [
+      '_wcp_operator', '_wcp_conditions', '_wcp_actions',
+    ];
+
+    foreach ( $meta_keys as $meta_key ) {
+      $values = get_post_meta( $ruleset->ID, $meta_key, true );
+
+      // Generate GUIDs for actions and conditions
+      if ( in_array( $meta_key, [ '_wcp_actions' ], true ) && is_array( $values ) ) {
+        foreach ( $values as $key => $value ) {
+          $values[$key]['guid'] = uniqid();
+        }
+      }
+
+      update_post_meta( $post_id, $meta_key, $values );
+    }
+
+    // Cloned ruleset should be disabled by default
+    update_post_meta( $post_id, '_wcp_enabled', 0 ); 
+
+    return $post_id;
   }
 
 	/**
@@ -180,7 +243,15 @@ class Woo_Conditional_Payments_Admin {
       $conditions = isset( $_POST['wcp_conditions'] ) ? $_POST['wcp_conditions'] : array();
       update_post_meta( $post->ID, '_wcp_conditions', array_values( (array) $conditions ) );
 
-			$actions = isset( $_POST['wcp_actions'] ) ? $_POST['wcp_actions'] : array();
+      $actions = isset( $_POST['wcp_actions'] ) ? $_POST['wcp_actions'] : array();
+
+      // Generate GUIDs for actions
+      foreach ( $actions as $key => $action ) {
+        if ( ! isset( $action['guid'] ) || empty( $action['guid'] ) ) {
+          $actions[$key]['guid'] = uniqid();
+        }
+      }
+
 			update_post_meta( $post->ID, '_wcp_actions', array_values( (array) $actions ) );
       
 			$enabled = ( isset( $_POST['ruleset_enabled'] ) && $_POST['ruleset_enabled'] ) ? 'yes' : 'no';
@@ -191,6 +262,19 @@ class Woo_Conditional_Payments_Admin {
 			
 			// Clear cache
 			delete_transient( 'wcp_name_address_fields' );
+
+      // Register strings for WPML
+      if ( function_exists( 'icl_object_id' ) ) {
+        foreach ( $actions as $key => $action ) {
+          if ( $action['type'] === 'add_fee' ) {
+            do_action( 'wpml_register_single_string', 'Conditional Payments for WooCommerce', sprintf( 'Fee description (GUID: %s)', $action['guid'] ), $action['fee_title'] );
+          }
+
+          if ( $action['type'] === 'set_no_payments_methods_msg' ) {
+            do_action( 'wpml_register_single_string', 'Conditional Payments for WooCommerce', sprintf( 'No payment methods message (GUID: %s)', $action['guid'] ), $action['error_msg'] );
+          }
+        }
+      }
 
       $url = add_query_arg( array(
         'ruleset_id' => $post->ID,
