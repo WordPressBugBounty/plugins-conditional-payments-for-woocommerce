@@ -158,11 +158,25 @@ class Woo_Conditional_Payments_Filters {
 				];
 			}
 
-			return NULL;
+			return [
+				'instance_id' => false,
+				'rate_id' => false,
+				'name' => false,
+			];
 		}
 		// Gets shipping method from cart
 		elseif ( WC()->cart ) {
 			$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+			// Virtual products only
+			if ( ! WC()->cart->needs_shipping() ) {
+				return [
+					'instance_id' => false,
+					'rate_id' => false,
+					'name' => false,
+				]; 
+			}
+			
 			if ( ! empty( $chosen_methods ) ) {
 				$rate_id = reset( $chosen_methods );
 

@@ -2,9 +2,9 @@
 Contributors: wooelements
 Tags: woocommerce payments, conditional payments, payment methods
 Requires at least: 4.5
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,10 @@ Conditional Payments is installed just like any other WordPress plugin.
 Once the plugin is activated, you can add rulesets in *WooCommerce > Settings > Payments > Conditions*.
 
 == Changelog ==
+
+= 3.2.1 =
+
+* Fixed a bug that caused the **Shipping method - is** condition to be evaluated incorrectly for virtual orders
 
 = 3.2.0 =
 
