@@ -329,6 +329,8 @@ class Woo_Conditional_Payments_Debug {
         return implode( ', ', $this->get_term_titles( (array) $condition['product_cat_ids'], 'product_cat' ) );
       case 'product_tags':
         return implode( ', ', $this->get_term_titles( (array) $condition['product_tags'], 'product_tag' ) );
+      case 'product_brands':
+        return implode( ', ', $this->get_term_titles( (array) $condition['product_brands'], 'product_brand' ) );
       case 'product_types':
         return implode( ', ', $this->get_product_type_titles( (array) $condition['product_types'] ) );
       case 'stock_status':

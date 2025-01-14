@@ -159,6 +159,10 @@
   display: block;
 }
 
+.woocommerce table.form-table table.wcp-table tr.wcp-type-product_brands .wcp_product_brand_value_input {
+  display: block;
+}
+
 .woocommerce table.form-table table.wcp-table tr.wcp-type-product_types .wcp_product_type_value_input {
   display: block;
 }

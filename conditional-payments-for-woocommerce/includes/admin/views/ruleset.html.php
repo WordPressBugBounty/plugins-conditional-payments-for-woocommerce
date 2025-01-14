@@ -48,6 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					data-selected-products="<?php echo htmlspecialchars( json_encode( $ruleset->get_products() ), ENT_QUOTES, 'UTF-8' ); ?>"
 					data-selected-coupons="<?php echo htmlspecialchars( json_encode( $ruleset->get_coupons() ), ENT_QUOTES, 'UTF-8' ); ?>"
 					data-selected-tags="<?php echo htmlspecialchars( json_encode( $ruleset->get_tags() ), ENT_QUOTES, 'UTF-8' ); ?>"
+					data-selected-brands="<?php echo htmlspecialchars( json_encode( $ruleset->get_brands() ), ENT_QUOTES, 'UTF-8' ); ?>"
 					data-conditions="<?php echo htmlspecialchars( json_encode( $ruleset->get_conditions() ), ENT_QUOTES, 'UTF-8' ); ?>"
 				>
 					<tbody class="woo-conditional-payments-condition-rows">
@@ -224,6 +225,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<# if ( data.selected_tags && data.selected_tags.length > 0 ) { #>
 						<# _.each(data.selected_tags, function(tag) { #>
 							<option value="{{ tag['id'] }}" selected>{{ tag['title'] }}</option>
+						<# }) #>
+					<# } #>
+				</select>
+			</div>
+
+			<div class="value_input wcp_product_brand_value_input">
+				<select class="wcp-brand-search" multiple="multiple" name="wcp_conditions[{{data.index}}][product_brands][]" data-placeholder="<?php esc_attr_e( 'Search for brands', 'woo-conditional-payments' ); ?>">
+					<# if ( data.selected_brands && data.selected_brands.length > 0 ) { #>
+						<# _.each(data.selected_brands, function(brand) { #>
+							<option value="{{ brand['id'] }}" selected>{{ brand['title'] }}</option>
 						<# }) #>
 					<# } #>
 				</select>

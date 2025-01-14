@@ -165,6 +165,11 @@ function woo_conditional_payments_filter_groups() {
           'operators' => [ 'in', 'exclusive', 'notin' ],
           'pro' => true,
         ],
+        'product_brands' => [
+          'title' => __( 'Product Brands', 'woo-conditional-payments' ),
+          'operators' => [ 'in', 'exclusive', 'notin' ],
+          'pro' => true,
+        ],
         'product_types' => [
           'title' => __( 'Product Types', 'woo-conditional-payments' ),
           'operators' => [ 'in', 'exclusive', 'notin' ],
@@ -979,6 +984,47 @@ function wcp_get_product_tags( $product_id ) {
   }
 
   return $tag_ids;
+}
+
+/**
+ * Get product brands
+ */
+function wcp_get_product_brands( $product_id ) {
+  $brand_ids = [];
+
+  if ( $product = wc_get_product( $product_id ) ) {
+    $terms = get_the_terms( $product->get_id(), 'product_brand' );
+    if ( $terms ) {
+      foreach ( $terms as $term ) {
+        $brand_ids[$term->term_id] = true;
+      }
+    }
+
+    // If this is variable product, append parent product brands
+    if ( $product->get_parent_id() ) {
+      $terms = get_the_terms( $product->get_parent_id(), 'product_brand' );
+      if ( $terms ) {
+        foreach ( $terms as $term ) {
+          $brand_ids[$term->term_id] = true;
+        }
+      }
+    }
+  }
+
+  $brand_ids = array_keys( $brand_ids );
+
+  // Special handling for WPML
+  if ( function_exists( 'icl_object_id' ) ) {
+    $default_lang = apply_filters( 'wpml_default_language', NULL );
+
+    foreach ( $brand_ids as $key => $brand_id ) {
+      $orig_brand_id = apply_filters( 'wpml_object_id', $brand_id, 'product_brand', true, $default_lang );
+
+      $brand_ids[$key] = $orig_brand_id;
+    }
+  }
+
+  return $brand_ids;
 }
 
 /**

@@ -18,6 +18,7 @@ jQuery(document).ready(function($) {
 			this.conditions = table.data( 'conditions' );
 
 			this.initTagSearch();
+			this.initBrandSearch();
 			this.initCouponSearch();
 			this.initDatepicker();
 			this.insertExisting();
@@ -43,7 +44,7 @@ jQuery(document).ready(function($) {
 					var select2_args = {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 3,
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 2,
 						escapeMarkup      : function( m ) {
 							return m;
 						},
@@ -55,6 +56,52 @@ jQuery(document).ready(function($) {
 								return {
 									term: params.term,
 									action: 'wcp_json_search_tags',
+								};
+							},
+							processResults: function( data ) {
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, term ) {
+										terms.push({
+											id: term.term_id,
+											text: term.name
+										});
+									});
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
+						}
+					};
+
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
+				});
+			} );
+		},
+
+		/**
+		 * Brand search
+		 */
+		initBrandSearch: function() {
+			$( document.body ).on( 'wc-enhanced-select-init', function() {
+				$( ':input.wcp-brand-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2_args = {
+						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder       : $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 2,
+						escapeMarkup      : function( m ) {
+							return m;
+						},
+						ajax: {
+							url: wc_enhanced_select_params.ajax_url,
+							dataType: 'json',
+							delay: 250,
+							data: function( params ) {
+								return {
+									term: params.term,
+									action: 'wcp_json_search_brands',
 								};
 							},
 							processResults: function( data ) {
@@ -295,6 +342,20 @@ jQuery(document).ready(function($) {
 						data.selected_tags.push({
 							'id': tag_id,
 							'title': tags_data[tag_id]
+						});
+					}
+				});
+			}
+
+			// Add brands
+			var brands_data = this.table.data( 'selected-brands' );
+			data.selected_brands = [];
+			if ( typeof data.product_brands !== 'undefined' && data.product_brands !== null && data.product_brands.length > 0 ) {
+				jQuery.each( data.product_brands, function( index, brand_id ) {
+					if ( typeof brands_data[brand_id] !== 'undefined' ) {
+						data.selected_brands.push({
+							'id': brand_id,
+							'title': brands_data[brand_id]
 						});
 					}
 				});

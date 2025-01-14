@@ -192,38 +192,38 @@ class Woo_Conditional_Payments_Frontend {
   }
 
   /**
-	 * Store customer details to the session for being used in filters
-	 */
-	public function store_customer_details( $post_data ) {
-		$data = array();
-		parse_str( $post_data, $data );
+   * Store customer details to the session for being used in filters
+   */
+  public function store_customer_details( $post_data ) {
+    $data = array();
+    parse_str( $post_data, $data );
 
-		$attrs = array(
-			'billing_first_name', 'billing_last_name', 'billing_company',
+    $attrs = array(
+      'billing_first_name', 'billing_last_name', 'billing_company',
       'shipping_first_name', 'shipping_last_name', 'shipping_company',
       'billing_email', 'billing_phone'
-		);
+    );
 
-		$same_addr = FALSE;
-		if ( ! isset( $data['ship_to_different_address'] ) || $data['ship_to_different_address'] != '1' ) {
-			$same_addr = TRUE;
-			$attrs = array(
-				'billing_first_name', 'billing_last_name', 'billing_company', 'billing_email', 'billing_phone',
-			);
-		}
+    $same_addr = FALSE;
+    if ( ! isset( $data['ship_to_different_address'] ) || $data['ship_to_different_address'] != '1' ) {
+      $same_addr = TRUE;
+      $attrs = array(
+        'billing_first_name', 'billing_last_name', 'billing_company', 'billing_email', 'billing_phone',
+      );
+    }
 
-		foreach ( $attrs as $attr ) {
-			WC()->customer->set_props( array(
-				$attr => isset( $data[$attr] ) ? wp_unslash( $data[$attr] ) : null,
-			) );
+    foreach ( $attrs as $attr ) {
+      WC()->customer->set_props( array(
+        $attr => isset( $data[$attr] ) ? wp_unslash( $data[$attr] ) : null,
+      ) );
 
-			if ( $same_addr ) {
-				$attr2 = str_replace( 'billing', 'shipping', $attr );
-				WC()->customer->set_props( array(
-					$attr2 => isset( $data[$attr] ) ? wp_unslash( $data[$attr] ) : null,
-				) );
-			}
-		}
+      if ( $same_addr ) {
+        $attr2 = str_replace( 'billing', 'shipping', $attr );
+        WC()->customer->set_props( array(
+          $attr2 => isset( $data[$attr] ) ? wp_unslash( $data[$attr] ) : null,
+        ) );
+      }
+    }
   }
 
   /**
@@ -290,26 +290,26 @@ class Woo_Conditional_Payments_Frontend {
     return $gateways;
   }
 
-	/**
-	 * Convert price to the active currency from the default currency
-	 */
-	public function convert_price( $value ) {
-		// WooCommerce Currency Switcher by realmag777
-		if ( isset( $GLOBALS['WOOCS'] ) && is_callable( [ $GLOBALS['WOOCS'], 'woocs_exchange_value' ] ) ) {
-			return floatval( $GLOBALS['WOOCS']->woocs_exchange_value( $value ) );
-		}
+  /**
+   * Convert price to the active currency from the default currency
+   */
+  public function convert_price( $value ) {
+    // WooCommerce Currency Switcher by realmag777
+    if ( isset( $GLOBALS['WOOCS'] ) && is_callable( [ $GLOBALS['WOOCS'], 'woocs_exchange_value' ] ) ) {
+      return floatval( $GLOBALS['WOOCS']->woocs_exchange_value( $value ) );
+    }
 
-		// WPML
-		if ( isset( $GLOBALS['woocommerce_wpml'] ) && isset( $GLOBALS['woocommerce_wpml']->multi_currency->prices ) && is_callable( [ $GLOBALS['woocommerce_wpml']->multi_currency->prices, 'convert_price_amount' ] ) ) {
-			return floatval( $GLOBALS['woocommerce_wpml']->multi_currency->prices->convert_price_amount( $value ) );
-		}
+    // WPML
+    if ( isset( $GLOBALS['woocommerce_wpml'] ) && isset( $GLOBALS['woocommerce_wpml']->multi_currency->prices ) && is_callable( [ $GLOBALS['woocommerce_wpml']->multi_currency->prices, 'convert_price_amount' ] ) ) {
+      return floatval( $GLOBALS['woocommerce_wpml']->multi_currency->prices->convert_price_amount( $value ) );
+    }
 
-		// Currency Switcher by Aelia
-		if ( isset( $GLOBALS['woocommerce-aelia-currencyswitcher'] ) && $GLOBALS['woocommerce-aelia-currencyswitcher'] ) {
-			$base_currency = apply_filters( 'wc_aelia_cs_base_currency', false );
+    // Currency Switcher by Aelia
+    if ( isset( $GLOBALS['woocommerce-aelia-currencyswitcher'] ) && $GLOBALS['woocommerce-aelia-currencyswitcher'] ) {
+      $base_currency = apply_filters( 'wc_aelia_cs_base_currency', false );
 
-			return floatval( apply_filters( 'wc_aelia_cs_convert', $value, $base_currency, get_woocommerce_currency() ) );
-		}
+      return floatval( apply_filters( 'wc_aelia_cs_convert', $value, $base_currency, get_woocommerce_currency() ) );
+    }
 
     // Price Based on Country for WooCommerce
     if ( class_exists( 'WCPBC_Pricing_Zones' ) ) {
@@ -320,29 +320,41 @@ class Woo_Conditional_Payments_Frontend {
       }
     }
 
-		return $value;
-	}
+    // CURCY – Multi Currency for WooCommerce
+    if ( class_exists( 'WOOMULTI_CURRENCY_Data' ) ) {
+      $settings = WOOMULTI_CURRENCY_Data::get_ins();
+      $currencies = $settings->get_list_currencies();
+      $current_currency = $settings->get_current_currency();
+      $rate = floatval( $currencies[$current_currency]['rate'] );
 
-	/**
-	 * Convert price to the default currency from the active currency
-	 */
-	public function convert_price_reverse( $value ) {
-		// WooCommerce Currency Switcher by realmag777
-		if ( isset( $GLOBALS['WOOCS'] ) && is_callable( [ $GLOBALS['WOOCS'], 'convert_from_to_currency' ] ) ) {
-			return floatval( $GLOBALS['WOOCS']->convert_from_to_currency( $value, $GLOBALS['WOOCS']->current_currency, $GLOBALS['WOOCS']->default_currency ) );
-		}
+      if ( $rate <> 1 ) {
+        return $value * $rate;
+      }
+    }
 
-		// WPML
-		if ( isset( $GLOBALS['woocommerce_wpml'] ) && isset( $GLOBALS['woocommerce_wpml']->multi_currency->prices ) && is_callable( [ $GLOBALS['woocommerce_wpml']->multi_currency->prices, 'unconvert_price_amount' ] ) ) {
-			return floatval( $GLOBALS['woocommerce_wpml']->multi_currency->prices->unconvert_price_amount( $value ) );
-		}
+    return $value;
+  }
 
-		// Currency Switcher by Aelia
-		if ( isset( $GLOBALS['woocommerce-aelia-currencyswitcher'] ) && $GLOBALS['woocommerce-aelia-currencyswitcher'] ) {
-			$base_currency = apply_filters( 'wc_aelia_cs_base_currency', false );
+  /**
+   * Convert price to the default currency from the active currency
+   */
+  public function convert_price_reverse( $value ) {
+    // WooCommerce Currency Switcher by realmag777
+    if ( isset( $GLOBALS['WOOCS'] ) && is_callable( [ $GLOBALS['WOOCS'], 'convert_from_to_currency' ] ) ) {
+      return floatval( $GLOBALS['WOOCS']->convert_from_to_currency( $value, $GLOBALS['WOOCS']->current_currency, $GLOBALS['WOOCS']->default_currency ) );
+    }
 
-			return floatval( apply_filters( 'wc_aelia_cs_convert', $value, get_woocommerce_currency(), $base_currency ) );
-		}
+    // WPML
+    if ( isset( $GLOBALS['woocommerce_wpml'] ) && isset( $GLOBALS['woocommerce_wpml']->multi_currency->prices ) && is_callable( [ $GLOBALS['woocommerce_wpml']->multi_currency->prices, 'unconvert_price_amount' ] ) ) {
+      return floatval( $GLOBALS['woocommerce_wpml']->multi_currency->prices->unconvert_price_amount( $value ) );
+    }
+
+    // Currency Switcher by Aelia
+    if ( isset( $GLOBALS['woocommerce-aelia-currencyswitcher'] ) && $GLOBALS['woocommerce-aelia-currencyswitcher'] ) {
+      $base_currency = apply_filters( 'wc_aelia_cs_base_currency', false );
+
+      return floatval( apply_filters( 'wc_aelia_cs_convert', $value, get_woocommerce_currency(), $base_currency ) );
+    }
 
     // Price Based on Country for WooCommerce
     if ( class_exists( 'WCPBC_Pricing_Zones' ) ) {
@@ -353,6 +365,18 @@ class Woo_Conditional_Payments_Frontend {
       }
     }
 
-		return $value;
-	}
+    // CURCY – Multi Currency for WooCommerce
+    if ( class_exists( 'WOOMULTI_CURRENCY_Data' ) ) {
+      $settings = WOOMULTI_CURRENCY_Data::get_ins();
+      $currencies = $settings->get_list_currencies();
+      $current_currency = $settings->get_current_currency();
+      $rate = floatval( $currencies[$current_currency]['rate'] );
+
+      if ( $rate <> 1 ) {
+        return $value / $rate;
+      }
+    }
+
+    return $value;
+  }
 }

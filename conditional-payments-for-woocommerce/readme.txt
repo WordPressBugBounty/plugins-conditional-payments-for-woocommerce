@@ -4,7 +4,7 @@ Tags: woocommerce payments, conditional payments, payment methods
 Requires at least: 4.5
 Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 3.2.1
+Stable tag: 3.3.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,10 @@ Conditional Payments is installed just like any other WordPress plugin.
 Once the plugin is activated, you can add rulesets in *WooCommerce > Settings > Payments > Conditions*.
 
 == Changelog ==
+
+= 3.3.0 =
+
+* Added multicurrency support for **CURCY - Multi Currency for WooCommerce**
 
 = 3.2.1 =
 

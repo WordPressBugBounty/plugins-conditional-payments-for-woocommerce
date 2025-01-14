@@ -3,7 +3,7 @@
 /*
 Plugin Name: Conditional Payments for WooCommerce
 Description: Disable payment methods based on shipping methods, customer address and much more.
-Version:     3.2.1
+Version:     3.3.0
 Author:      Lauri Karisola / WP Trio
 Author URI:  https://wptrio.com
 Text Domain: woo-conditional-payments
@@ -25,14 +25,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin version
  */
 if ( ! defined( 'CONDITIONAL_PAYMENTS_FOR_WOO_VERSION' ) ) {
-	define( 'CONDITIONAL_PAYMENTS_FOR_WOO_VERSION', '3.2.1' );
+	define( 'CONDITIONAL_PAYMENTS_FOR_WOO_VERSION', '3.3.0' );
 }
 
 /**
  * Assets version
  */
 if ( ! defined( 'WOO_CONDITIONAL_PAYMENTS_ASSETS_VERSION' ) ) {
-	define( 'WOO_CONDITIONAL_PAYMENTS_ASSETS_VERSION', '3.2.1' );
+	define( 'WOO_CONDITIONAL_PAYMENTS_ASSETS_VERSION', '3.3.0' );
 }
 
 /** 

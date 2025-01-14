@@ -204,6 +204,29 @@ class Woo_Conditional_Payments_Ruleset {
 
     return $tags;
   }
+
+  /**
+   * Get brands which are selected in conditions
+   */
+  public function get_brands() {
+    $brand_ids = [];
+
+    foreach ( $this->get_conditions() as $condition ) {
+      if ( isset( $condition['product_brands'] ) && is_array( $condition['product_brands'] ) ) {
+        $brand_ids = array_merge( $brand_ids, $condition['product_brands'] );
+      }
+    }
+
+    $brands = [];
+    foreach ( $brand_ids as $brand_id ) {
+      $brand = get_term( $brand_id, 'product_brand' );
+      if ( $brand ) {
+        $brands[$brand->term_id] = wp_kses_post( $brand->name );
+      }
+    }
+
+    return $brands;
+  }
   
   /**
    * Get conditions for the ruleset
