@@ -102,7 +102,7 @@ class Woo_Conditional_Payments_Ruleset {
       'action' => 'delete',
     ), admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments' ) );
 
-    return $url;
+    return wp_nonce_url( $url, 'wcp-delete-ruleset' );
   }
 
   /**
@@ -114,7 +114,7 @@ class Woo_Conditional_Payments_Ruleset {
       'action' => 'duplicate',
     ], admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments' ) );
 
-    return $url;
+    return wp_nonce_url( $url, 'wcp-duplicate-ruleset' );
   }
 
   /**

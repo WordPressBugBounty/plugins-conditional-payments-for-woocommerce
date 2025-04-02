@@ -137,7 +137,9 @@ class Woo_Conditional_Payments_Admin {
       }
 
       // Delete ruleset
-      if ( $ruleset_id && 'delete' === $action ) {
+      if ( $ruleset_id && 'delete' === $action && 'wcp_ruleset' === get_post_type( $ruleset_id ) ) {
+        check_ajax_referer( 'wcp-delete-ruleset' );
+
         wp_delete_post( $ruleset_id, false );
 
         // Clear cache
@@ -149,7 +151,9 @@ class Woo_Conditional_Payments_Admin {
       }
 
       // Duplicate ruleset
-      if ( $ruleset_id && 'duplicate' === $action ) {
+      if ( $ruleset_id && 'duplicate' === $action && 'wcp_ruleset' === get_post_type( $ruleset_id ) ) {
+        check_ajax_referer( 'wcp-duplicate-ruleset' );
+
         $cloned_ruleset_id = $this->clone_ruleset( $ruleset_id );
 
         wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=woo_conditional_payments&ruleset_id=' . $cloned_ruleset_id ) );
