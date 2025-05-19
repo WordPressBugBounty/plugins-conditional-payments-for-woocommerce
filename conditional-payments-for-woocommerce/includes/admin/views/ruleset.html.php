@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="4" class="forminp">
+							<td colspan="4">
 								<button type="button" class="button" id="wcp-add-condition"><?php _e( 'Add Condition', 'woo-conditional-payments' ); ?></button>
 								<select name="wcp_operator">
 									<option value="and" <?php selected( 'and', $ruleset->get_conditions_operator() ); ?>><?php _e( 'All conditions have to pass (AND)', 'woo-conditional-payments' ); ?></option>
@@ -88,7 +88,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="4" class="forminp">
+							<td colspan="4">
 								<button type="button" class="button" id="wcp-add-action"><?php _e( 'Add Action', 'woo-conditional-payments' ); ?></button>
 							</td>
 						</tr>
@@ -470,14 +470,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<select name="wcp_actions[{{data.index}}][type]" class="wcp_action_type_select">
 				<option value=""><?php echo wcp_esc_html( __( '- Select action - ', 'woo-conditional-payments' ) ); ?></option>
 
-				<?php foreach ( woo_conditional_payments_actions() as $key => $action ) { ?>
-					<option
-						value="<?php echo esc_attr( $key ); ?>"
-						<?php echo ( isset( $action['pro'] ) && $action['pro'] ) ? 'disabled' : ''; ?>
-						<# if ( data.type == '<?php echo esc_js( $key ); ?>' ) { #>selected<# } #>
-					>
-						<?php echo wcp_esc_html( wcp_get_control_title( $action ) ); ?>
-					</option>
+				<?php foreach ( wcp_get_grouped_actions() as $group_id => $group ) { ?>
+					<optgroup label="<?php echo esc_attr( $group['title'] ); ?>">
+						<?php foreach ( $group['actions'] as $key => $action ) { ?>
+							<option
+								value="<?php echo esc_attr( $key ); ?>"
+								<?php echo ( isset( $action['pro'] ) && $action['pro'] ) ? 'disabled' : ''; ?>
+								<# if ( data.type == '<?php echo esc_js( $key ); ?>' ) { #>selected<# } #>
+							>
+								<?php echo wcp_esc_html( wcp_get_control_title( $action ) ); ?>
+							</option>
+						<?php } ?>
+					</optgroup>
 				<?php } ?>
 			</select>
 

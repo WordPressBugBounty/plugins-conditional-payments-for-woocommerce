@@ -561,6 +561,12 @@ jQuery(document).ready(function($) {
 
 			$( this ).toggle( ( visibleOptions > 0 || displayFeatures ) );
 		} );
+
+		$( '.wcp-table .wcp-action optgroup' ).each( function() {
+			var visibleOptions = $( 'option:not(:disabled)', this ).length;
+
+			$( this ).toggle( ( visibleOptions > 0 || displayFeatures ) );
+		} );
 	} );
 	$( 'input[name="wcp_pro_features"]' ).trigger( 'change' );
 

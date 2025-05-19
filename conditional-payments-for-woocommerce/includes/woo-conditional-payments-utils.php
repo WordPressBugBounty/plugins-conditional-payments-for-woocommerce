@@ -418,19 +418,67 @@ function woo_conditional_payments_actions() {
   return apply_filters( 'woo_conditional_payments_actions', [
     'enable_payment_methods' => [
       'title' => __( 'Enable payment methods', 'woo-conditional-payments' ),
+      'group' => 'availability',
     ],
     'disable_payment_methods' => [
       'title' => __( 'Disable payment methods', 'woo-conditional-payments' ),
+      'group' => 'availability',
     ],
     'add_fee' => [
       'title' => __( 'Add payment method fee', 'woo-conditional-payments' ),
       'pro' => true,
+      'group' => 'fees',
     ],
     'set_no_payments_methods_msg' => [
       'title' => __( 'Set no payment methods available message', 'woo-conditional-payments' ),
       'pro' => true,
+      'group' => 'messages',
     ],
   ] );
+}
+
+/**
+ * Get grouped actions
+ */
+function wcp_get_grouped_actions() {
+  $actions = woo_conditional_payments_actions();
+  $groups = [
+    'availability' => [
+      'title' => __( 'Availability', 'woo-conditional-payments' ),
+      'actions' => [],
+    ],
+    'fees' => [
+      'title' => __( 'Fees', 'woo-conditional-payments' ),
+      'actions' => [],
+    ],
+    'messages' => [
+      'title' => __( 'Messages', 'woo-conditional-payments' ),
+      'actions' => [],
+    ],
+    'other' => [
+      'title' => __( 'Other', 'woo-conditional-payments' ),
+      'actions' => [],
+    ],
+  ];
+
+  foreach ( $actions as $key => $action ) {
+    $group = isset( $action['group'] ) ? $action['group'] : 'other';
+
+    if ( isset( $groups[$group] ) ) {
+      $groups[$group]['actions'][$key] = $action;
+    } else {
+      $groups['other']['actions'][$key] = $action;
+    }
+  }
+
+  // Remove empty groups
+  foreach ( $groups as $key => $group ) {
+    if ( empty( $group['actions'] ) ) {
+      unset( $groups[$key] );
+    }
+  }
+
+  return $groups;
 }
 
 /**

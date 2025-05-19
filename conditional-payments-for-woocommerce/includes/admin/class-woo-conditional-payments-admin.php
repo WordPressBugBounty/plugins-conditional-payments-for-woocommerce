@@ -33,6 +33,9 @@ class Woo_Conditional_Payments_Admin {
 
     // Admin AJAX action for searching products
     add_action( 'wp_ajax_wcp_json_search_products', [ $this, 'search_products' ] );
+
+    // Add link to the rulesets for the new React based payment method settings
+    add_action( 'woocommerce_sections_checkout', [ $this, 'add_ruleset_link' ], 10, 0 );
   }
 
   /**
@@ -361,6 +364,44 @@ class Woo_Conditional_Payments_Admin {
     $GLOBALS['wcp_search_products'] = true;
 
     WC_AJAX::json_search_products_and_variations();
+  }
+
+  /**
+   * Add link to the rulesets for the new React based
+   * payment method settings
+   */
+  public function add_ruleset_link() {
+    global $current_section;
+
+    if ( $current_section === 'woo_conditional_payments' ) {
+      return;
+    }
+
+    if ( ! class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+      return;
+    }
+
+    if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+      return;
+    }
+
+    $sections = apply_filters( 'woocommerce_get_sections_checkout', [
+      '' => __( 'General', 'woocommerce' )
+    ] );
+
+    echo '<ul class="subsubsub">';
+
+    $array_keys = array_keys( $sections );
+
+    foreach ( $sections as $id => $label ) {
+      $url = admin_url( 'admin.php?page=wc-settings&tab=' . 'checkout' . '&section=' . sanitize_title( $id ) );
+      $class = ( $current_section === $id ? 'current' : '' );
+      $separator = ( end( $array_keys ) === $id ? '' : '|' );
+      $text = esc_html( $label );
+      echo "<li><a href='$url' class='$class'>$text</a> $separator </li>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    }
+
+    echo '</ul><br class="clear" />';
   }
 
   /**

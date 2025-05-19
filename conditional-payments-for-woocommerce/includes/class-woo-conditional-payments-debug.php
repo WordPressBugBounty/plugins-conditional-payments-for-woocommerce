@@ -94,6 +94,11 @@ class Woo_Conditional_Payments_Debug {
    * Format debug data
    */
   public function format() {
+    // Do not run for admin
+    if ( is_admin() ) {
+      return;
+    }
+
     // Do not run if all rulesets are disabled
     if ( get_option( 'wcp_disable_all', false ) ) {
       return;
@@ -243,6 +248,16 @@ class Woo_Conditional_Payments_Debug {
    * Get shipping method titles
    */
   public function get_payment_method_titles( $action ) {
+    // Fix for Tera Wallet which doesn't like if it's initialized
+    // prematurely in woocommerce_init. Return only gateway IDs
+    if ( current_action() != 'woocommerce_available_payment_gateways' ) {
+      if ( is_array( $action['payment_method_ids'] ) ) {
+        return $action['payment_method_ids'];
+      } else {
+        return [];
+      }
+    }
+
     if ( ! $this->payment_methods ) {
       $options = woo_conditional_payments_get_payment_method_options();
 

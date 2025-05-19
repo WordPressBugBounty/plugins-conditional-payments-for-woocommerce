@@ -2,9 +2,9 @@
 Contributors: wooelements
 Tags: woocommerce payments, conditional payments, payment methods
 Requires at least: 4.5
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 3.3.1
+Stable tag: 3.3.2
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,12 @@ Conditional Payments is installed just like any other WordPress plugin.
 Once the plugin is activated, you can add rulesets in *WooCommerce > Settings > Payments > Conditions*.
 
 == Changelog ==
+
+= 3.3.2 =
+
+* Restored **Conditions** link in the **Payments** section of the settings, which was inadvertently removed in WooCommerce 9.8.5
+* Improved compatibility with TeraWallet
+* Minor UI improvements
 
 = 3.3.1 =
 
