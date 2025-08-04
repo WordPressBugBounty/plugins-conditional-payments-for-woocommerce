@@ -373,7 +373,7 @@ class Woo_Conditional_Payments_Admin {
   public function add_ruleset_link() {
     global $current_section;
 
-    if ( $current_section === 'woo_conditional_payments' ) {
+    if ( ! empty( $current_section ) ) {
       return;
     }
 
@@ -381,7 +381,7 @@ class Woo_Conditional_Payments_Admin {
       return;
     }
 
-    if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+    if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) && version_compare( WC()->version, '9.9.0' ) === -1 ) {
       return;
     }
 
