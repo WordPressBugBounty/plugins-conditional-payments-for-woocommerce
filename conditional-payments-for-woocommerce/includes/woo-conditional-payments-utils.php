@@ -185,6 +185,15 @@ function woo_conditional_payments_filter_groups() {
           'operators' => [ 'in', 'notin' ],
           'pro' => true,
         ],
+        'product_meta' => [
+          'title' => __( 'Product Meta', 'woo-conditional-payments' ),
+          'operators' => [
+            'gt', 'gte', 'lt', 'lte', 'e',
+            'in', 'exclusive', 'notin',
+            'exists', 'notexists',
+          ],
+          'pro' => true,
+        ],
       ],
     ],
     'billing_address' => array(
@@ -220,7 +229,7 @@ function woo_conditional_payments_filter_groups() {
         ),
         'billing_city' => array(
           'title' => __( 'City (billing)', 'woo-conditional-payments' ),
-          'operators' => array( 'exists', 'notexists', 'contains' ),
+          'operators' => array( 'exists', 'notexists', 'contains', 'is', 'isnot' ),
         ),
         'billing_postcode' => array(
           'title' => __( 'Postcode (billing)', 'woo-conditional-payments' ),
@@ -271,7 +280,7 @@ function woo_conditional_payments_filter_groups() {
         ),
         'shipping_city' => array(
           'title' => __( 'City (shipping)', 'woo-conditional-payments' ),
-          'operators' => array( 'exists', 'notexists', 'contains' ),
+          'operators' => array( 'exists', 'notexists', 'contains', 'is', 'isnot' ),
         ),
         'shipping_postcode' => array(
           'title' => __( 'Postcode (shipping)', 'woo-conditional-payments' ),
@@ -533,7 +542,8 @@ function wcp_get_fee_modes() {
 
   return [
     'fixed' => $currency_symbol,
-    'pct' => '%',
+    'pct' => '% of subtotal',
+    'pct_total' => '% of total',
   ];
 }
 
@@ -1147,3 +1157,34 @@ function wcp_wpml_has_strings() {
   return false;
 }
 
+/**
+ * Debug mode options
+ */
+function wcp_debug_mode_options() {
+  return [
+    '' => __( 'Disabled', 'woo-conditional-payments' ),
+    'admin' => __( 'Admin only', 'woo-conditional-payments' ),
+    '1' => __( 'Public', 'woo-conditional-payments' ),
+  ];
+}
+
+/**
+ * Check if operator is numerical
+ */
+function wcp_is_operator_numerical( $operator ) {
+  return in_array( $operator, [ 'gt', 'gte', 'lt', 'lte', 'e' ], true );
+}
+
+/**
+ * Check if operator is set based
+ */
+function wcp_is_operator_set( $operator ) {
+  return in_array( $operator, [ 'in', 'exclusive', 'notin', 'allin'  ], true );
+}
+
+/**
+ * Check if operator is boolean
+ */
+function wcp_is_operator_boolean( $operator ) {
+  return in_array( $operator, [ 'exists', 'notexists' ], true );
+}

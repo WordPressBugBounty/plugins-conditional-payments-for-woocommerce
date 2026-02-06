@@ -104,10 +104,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</label>
 			</th>
 			<td class="forminp">
-				<label for="wcp_debug_mode">
-					<input type="checkbox" name="wcp_debug_mode" id="wcp_debug_mode" value="1" <?php checked( get_option( 'wcp_debug_mode', false ) ); ?> />
-					<?php esc_html_e( 'Debug mode', 'woo-conditional-payments' ); ?>
-				</label>
+				<select name="wcp_debug_mode">
+					<?php foreach ( wcp_debug_mode_options() as $key => $label ) { ?>
+						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( get_option( 'wcp_debug_mode', '' ), $key ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php } ?>
+				</select>
 
 				<p class="description"><?php esc_html_e( 'Debug mode shows passed conditions and which actions were run in the checkout.', 'woo-conditional-payments' ); ?></p>
 			</td>

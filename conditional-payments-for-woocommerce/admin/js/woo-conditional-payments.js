@@ -20,6 +20,7 @@ jQuery(document).ready(function($) {
 			this.initTagSearch();
 			this.initBrandSearch();
 			this.initCouponSearch();
+			this.initMetaSearch();
 			this.initDatepicker();
 			this.insertExisting();
 			this.insertEmpty();
@@ -33,6 +34,53 @@ jQuery(document).ready(function($) {
 
 				this.triggersInit = true;
 			}
+		},
+
+		/**
+		 * Meta search
+		 */
+		initMetaSearch: function() {
+			$( document.body ).on( 'wc-enhanced-select-init', function() {
+				$( ':input.wcp-product-meta-field-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2_args = {
+						allowClear : $( this ).data( 'allow_clear' ) ? true : false,
+						dropdownAutoWidth : true,
+						placeholder : $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 2,
+						escapeMarkup : function( m ) {
+							return m;
+						},
+						ajax: {
+							url: wc_enhanced_select_params.ajax_url,
+							dataType: 'json',
+							delay: 250,
+							data: function( params ) {
+								return {
+									term: params.term,
+									action: 'wcp_json_search_meta_keys',
+								};
+							},
+							processResults: function( data ) {
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, term ) {
+										terms.push({
+											id: term.id,
+											text: term.name
+										});
+									});
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
+						}
+					};
+
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
+				});
+			} );
 		},
 
 		/**

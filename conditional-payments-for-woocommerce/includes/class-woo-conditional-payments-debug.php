@@ -62,7 +62,7 @@ class Woo_Conditional_Payments_Debug {
    * Render debug information in the checkout (blocks-based checkout) 
    */
   public function render_block( $content ) {
-    if ( ! $this->block_rendered && wcp_is_blocks_checkout() && function_exists( 'is_checkout' ) && is_checkout() && ! isset( $_GET['pay_for_order'] ) ) {
+    if ( ! $this->block_rendered && wcp_is_blocks_checkout() && function_exists( 'is_checkout' ) && is_checkout() && ! is_order_received_page() && ! isset( $_GET['pay_for_order'] ) ) {
       $this->output_debug_checkout( true );
     }
 
@@ -87,7 +87,18 @@ class Woo_Conditional_Payments_Debug {
    * Get debug mode status
    */
   public function is_enabled() {
-    return (bool) get_option( 'wcp_debug_mode', false ) && function_exists( 'WC' );
+    if ( function_exists( 'WC' ) ) {
+      $debug_mode = strval( get_option( 'wcp_debug_mode', '' ) );
+
+      switch ( $debug_mode ) {
+        case '1':
+          return true;
+        case 'admin':
+          return current_user_can( 'manage_woocommerce' );
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -225,6 +236,8 @@ class Woo_Conditional_Payments_Debug {
       case 'add_fee':
         $fee_modes = wcp_get_fee_modes();
 
+        $cols['methods'] = implode( ', ', $this->get_payment_method_titles( $action ) );
+
         $cols['value'] = sprintf( '%s %s', $action['fee_amount'], $fee_modes[$action['fee_mode']] );
         break;
       case 'set_no_payments_methods_msg':
@@ -292,7 +305,19 @@ class Woo_Conditional_Payments_Debug {
 
     $value = $this->translate_condition_value( $condition );
 
-    $cols = [ $filter, $operator ];
+    $cols = [ $filter ];
+
+    // Product meta
+    if ( $condition['type'] === 'product_meta' ) {
+      $cols[0] = sprintf( '%s (%s)', $cols[0], $condition['meta_key'] );
+
+      // Add highest / lowest for numerical product meta
+      if ( wcp_is_operator_numerical( $condition['operator'] ) ) {
+        $cols[] = $condition['product_measurement_mode'];
+      }
+    }
+
+    $cols[] = $operator;
 
     // Some conditions only has operator and not value (e.g. customer logged in condition)
     if ( $value !== null ) {
@@ -314,18 +339,23 @@ class Woo_Conditional_Payments_Debug {
       case 'billing_company':
       case 'billing_address_1':
       case 'billing_address_2':
-      case 'billing_city':
       case 'shipping_first_name':
       case 'shipping_last_name':
       case 'shipping_company':
       case 'shipping_address_1':
       case 'shipping_address_2':
-      case 'shipping_city':
       case 'orders':
         return $condition['value'];
       case 'billing_postcode':
       case 'shipping_postcode':
         return $this->convert_list( $condition['postcodes'] );
+      case 'billing_city':
+      case 'shipping_city':
+        if ( in_array( $condition['operator'], [ 'is', 'isnot' ], true ) ) {
+          return $this->convert_list( $condition['cities'] );
+        } else {
+          return $condition['value'];
+        }
       case 'billing_phone':
       case 'shipping_phone':
         return $this->convert_list( $condition['phones'] );
@@ -340,6 +370,14 @@ class Woo_Conditional_Payments_Debug {
         return implode( ', ', $this->get_shipping_method_titles( $condition ) );
       case 'shipping_class':
         return implode( ', ', $this->get_term_titles( (array) $condition['shipping_class_ids'], 'product_shipping_class' ) );
+      case 'product_meta':
+        if ( wcp_is_operator_numerical( $condition['operator'] ) ) {
+          return $condition['value'];
+        } else if ( wcp_is_operator_set( $condition['operator'] ) ) {
+          return $this->convert_list( $condition['textarea'] );
+        } else if ( wcp_is_operator_boolean( $condition['operator'] ) ) {
+          return null;
+        }
       case 'product_cats':
         return implode( ', ', $this->get_term_titles( (array) $condition['product_cat_ids'], 'product_cat' ) );
       case 'product_tags':

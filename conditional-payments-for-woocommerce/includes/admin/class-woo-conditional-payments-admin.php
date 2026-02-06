@@ -298,7 +298,12 @@ class Woo_Conditional_Payments_Admin {
     global $current_section;
     
     if ( 'woo_conditional_payments' === $current_section && isset( $_POST['wcp_settings'] ) ) {
-      update_option( 'wcp_debug_mode', ( isset( $_POST['wcp_debug_mode'] ) && $_POST['wcp_debug_mode'] ) );
+      $debug = '';
+      if ( isset( $_POST['wcp_debug_mode'] ) && in_array( $_POST['wcp_debug_mode'], [ '', 'admin', '1' ], true ) ) {
+        $debug = $_POST['wcp_debug_mode'];
+      }
+      update_option( 'wcp_debug_mode', $debug );
+
       update_option( 'wcp_disable_all', ( isset( $_POST['wcp_disable_all'] ) && $_POST['wcp_disable_all'] ) );
 
       // Ruleset ordering

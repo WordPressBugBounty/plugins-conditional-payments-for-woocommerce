@@ -2,9 +2,9 @@
 Contributors: wooelements
 Tags: woocommerce payments, conditional payments, payment methods
 Requires at least: 4.5
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 3.3.3
+Stable tag: 3.4.1
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,7 @@ Make sure to check out other useful plugins from the author.
 
 * [Conditional Shipping for WooCommerce](https://wordpress.org/plugins/conditional-shipping-for-woocommerce)
 * [Stock Sync for WooCommerce](https://wordpress.org/plugins/stock-sync-for-woocommerce/)
+* [Product Sync for WooCommerce](https://wptrio.com/products/woocommerce-product-sync-pro/)
 
 == Installation ==
 Conditional Payments is installed just like any other WordPress plugin.
@@ -81,6 +82,15 @@ Conditional Payments is installed just like any other WordPress plugin.
 Once the plugin is activated, you can add rulesets in *WooCommerce > Settings > Payments > Conditions*.
 
 == Changelog ==
+
+= 3.4.1 =
+
+* Added **is** and **is not** operators for billing and shipping city conditions. City input now allows a list separated by newlines
+
+= 3.4.0 =
+
+* Added **Admin only** mode for the debug mode to make it visible only for administrators (previously visible to all users)
+* Improved compatibility with the blocks checkout
 
 = 3.3.3 =
 

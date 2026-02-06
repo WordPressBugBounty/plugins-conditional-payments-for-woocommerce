@@ -128,37 +128,61 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wcp_row_template">
 	<tr valign="top" class="condition_row">
 		<td class="wcp-condition">
-			<select name="wcp_conditions[{{data.index}}][type]" class="wcp_condition_type_select">
-				<option value=""><?php echo wcp_esc_html( __( '- Select condition - ', 'woo-conditional-payments' ) ); ?></option>
+			<div class="wcp-condition-inputs">
+				<div>
+					<select name="wcp_conditions[{{data.index}}][type]" class="wcp_condition_type_select">
+						<option value=""><?php echo wcp_esc_html( __( '- Select condition - ', 'woo-conditional-payments' ) ); ?></option>
 
-				<?php foreach ( woo_conditional_payments_filter_groups() as $filter_group ) { ?>
-					<optgroup label="<?php echo esc_attr( $filter_group['title'] ); ?>">
-						<?php foreach ( $filter_group['filters'] as $key => $filter ) { ?>
-							<option
-								value="<?php echo esc_attr( $key ); ?>"
-								<?php echo ( isset( $filter['pro'] ) && $filter['pro'] ) ? 'disabled' : ''; ?>
-								data-operators="<?php echo htmlspecialchars( json_encode( $filter['operators'] ), ENT_QUOTES, 'UTF-8'); ?>"
-								<# if ( data.type == '<?php echo esc_js( $key ); ?>' ) { #>selected<# } #>
-							>
-								<?php echo wcp_esc_html( wcp_get_control_title( $filter ) ); ?>
-							</option>
+						<?php foreach ( woo_conditional_payments_filter_groups() as $filter_group ) { ?>
+							<optgroup label="<?php echo esc_attr( $filter_group['title'] ); ?>">
+								<?php foreach ( $filter_group['filters'] as $key => $filter ) { ?>
+									<option
+										value="<?php echo esc_attr( $key ); ?>"
+										<?php echo ( isset( $filter['pro'] ) && $filter['pro'] ) ? 'disabled' : ''; ?>
+										data-operators="<?php echo htmlspecialchars( json_encode( $filter['operators'] ), ENT_QUOTES, 'UTF-8'); ?>"
+										<# if ( data.type == '<?php echo esc_js( $key ); ?>' ) { #>selected<# } #>
+									>
+										<?php echo wcp_esc_html( wcp_get_control_title( $filter ) ); ?>
+									</option>
+								<?php } ?>
+							</optgroup>
 						<?php } ?>
-					</optgroup>
-				<?php } ?>
-			</select>
+					</select>
+				</div>
+
+				<div class="value_input wcp_product_meta_key_input">
+					<select class="wcp-product-meta-field-search" name="wcp_conditions[{{data.index}}][meta_key]" data-placeholder="<?php esc_attr_e( 'Meta key', 'woo-conditional-payments' ); ?>">
+						<# if ( data.meta_key ) { #>
+							<option selected value="{{data.meta_key}}">{{data.meta_key}}</option>
+						<# } #>
+					</select>
+				</div>
+			</div>
 		</td>
 		<td class="wcp-operator">
-			<select class="wcp_operator_select" name="wcp_conditions[{{data.index}}][operator]">
-				<?php foreach ( woo_conditional_payments_operators() as $key => $operator ) { ?>
-					<option
-						value="<?php echo esc_attr( $key ); ?>"
-						class="wcp-operator wcp-operator-<?php echo esc_attr( $key ); ?>"
-						<# if ( data.operator == '<?php echo esc_js( $key ); ?>' ) { #>selected<# } #>
-					>
-						<?php echo wcp_esc_html( $operator ); ?>
-					</option>
-				<?php } ?>
-			</select>
+			<div class="wcp-operator-inputs">
+				<div class="value_input wcp_product_measurement_mode_input">
+					<select name="wcp_conditions[{{data.index}}][product_measurement_mode]" class="">
+						<option value="highest" <# if ( data.product_measurement_mode && data.product_measurement_mode == 'highest' ) { #>selected<# } #>><?php esc_html_e( 'highest', 'woo-conditional-payments' ); ?></option>
+						<option value="lowest" <# if ( data.product_measurement_mode && data.product_measurement_mode == 'lowest' ) { #>selected<# } #>><?php esc_html_e( 'lowest', 'woo-conditional-payments' ); ?></option>
+						<option value="sum" <# if ( data.product_measurement_mode && data.product_measurement_mode == 'sum' ) { #>selected<# } #>><?php esc_html_e( 'total sum', 'woo-conditional-payments' ); ?></option>
+					</select>
+				</div>
+
+				<div>
+					<select class="wcp_operator_select" name="wcp_conditions[{{data.index}}][operator]">
+						<?php foreach ( woo_conditional_payments_operators() as $key => $operator ) { ?>
+							<option
+								value="<?php echo esc_attr( $key ); ?>"
+								class="wcp-operator wcp-operator-<?php echo esc_attr( $key ); ?>"
+								<# if ( data.operator == '<?php echo esc_js( $key ); ?>' ) { #>selected<# } #>
+							>
+								<?php echo wcp_esc_html( $operator ); ?>
+							</option>
+						<?php } ?>
+					</select>
+				</div>
+			</div>
 		</td>
 		<td class="wcp-values">
 			<input class="input-text value_input regular-input wcp_text_value_input" type="text" name="wcp_conditions[{{data.index}}][value]" value="{{data.value}}" />
@@ -167,6 +191,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<textarea name="wcp_conditions[{{data.index}}][postcodes]" class="" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>">{{ data.postcodes }}</textarea>
 
 				<div class="description"><?php esc_html_e( 'Postcodes containing wildcards (e.g. CB23*) or fully numeric ranges (e.g. <code>90210...99000</code>) are also supported.', 'woo-conditional-payments' ); ?></div>
+			</div>
+
+			<div class="value_input wcp_textarea_value_input">
+				<textarea name="wcp_conditions[{{data.index}}][textarea]" class="" placeholder="<?php esc_attr_e( 'List 1 value per line', 'woocommerce' ); ?>">{{ data.textarea }}</textarea>
 			</div>
 
 			<div class="value_input wcp_ip_address_value_input">
@@ -181,6 +209,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="value_input wcp_billing_phone_value_input">
 				<textarea name="wcp_conditions[{{data.index}}][phones]" class="" placeholder="<?php esc_attr_e( 'List 1 phone number per line', 'woo-conditional-payments' ); ?>">{{ data.phones }}</textarea>
+			</div>
+
+			<div class="value_input wcp_city_value_input">
+				<textarea name="wcp_conditions[{{data.index}}][cities]" class="" placeholder="<?php esc_attr_e( 'List 1 city per line', 'woo-conditional-payments' ); ?>">{{ data.cities }}</textarea>
 			</div>
 
 			<div class="value_input wcp_subtotal_value_input">

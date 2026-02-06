@@ -44,8 +44,8 @@ class Woo_Conditional_Payments_Filters {
 	 * 
 	 * @return WC_Product[]
 	 */
-	public static function _get_order_products() {
-		$products = array();
+	public static function _get_order_products( $with_qtys = false ) {
+		$products = [];
 
 		$order_id = absint( get_query_var( 'order-pay' ) );
 
@@ -57,7 +57,14 @@ class Woo_Conditional_Payments_Filters {
 		    $product = $item->get_product();
 
 				if ( $product && is_callable( [$product, 'get_id'] ) ) {
-					$products[$product->get_id()] = $product;
+					if ( $with_qtys ) {
+						$products[$product->get_id()] = [
+							'qty' => $item->get_quantity(),
+							'product' => $product,
+						];
+					} else {
+						$products[$product->get_id()] = $product;
+					}
 				}
 			}
 		}
@@ -65,7 +72,14 @@ class Woo_Conditional_Payments_Filters {
 		elseif ( WC()->cart ) {
 			foreach ( WC()->cart->get_cart() as $key => $item ) {
 				if ( isset( $item['data'] ) && ! empty( $item['data'] ) && is_callable( [$item['data'], 'get_id'] ) ) {
-					$products[$item['data']->get_id()] = $item['data'];
+					if ( $with_qtys ) {
+						$products[$item['data']->get_id()] = [
+							'qty' => $item['quantity'],
+							'product' => $item['data'],
+						];
+					} else {
+						$products[$item['data']->get_id()] = $item['data'];
+					}
 				}
 			}
 		}
@@ -574,7 +588,7 @@ class Woo_Conditional_Payments_Filters {
 	public static function filter_billing_company( $condition ) { return ! self::_text_filtering( 'billing_company', $condition ); }
 	public static function filter_billing_address_1( $condition ) { return ! self::_text_filtering( 'billing_address_1', $condition ); }
 	public static function filter_billing_address_2( $condition ) { return ! self::_text_filtering( 'billing_address_2', $condition ); }
-	public static function filter_billing_city( $condition ) { return ! self::_text_filtering( 'billing_city', $condition ); }
+	public static function filter_billing_city( $condition ) { return ! self::city_filtering( 'billing_city', $condition ); }
 	public static function filter_billing_postcode( $condition ) { return ! self::_postcode_filtering( 'billing_postcode', $condition ); }
 
 	/**
@@ -585,8 +599,51 @@ class Woo_Conditional_Payments_Filters {
 	public static function filter_shipping_company( $condition ) { return ! self::_text_filtering( 'shipping_company', $condition ); }
 	public static function filter_shipping_address_1( $condition ) { return ! self::_text_filtering( 'shipping_address_1', $condition ); }
 	public static function filter_shipping_address_2( $condition ) { return ! self::_text_filtering( 'shipping_address_2', $condition ); }
-	public static function filter_shipping_city( $condition ) { return ! self::_text_filtering( 'shipping_city', $condition ); }
+	public static function filter_shipping_city( $condition ) { return ! self::city_filtering( 'shipping_city', $condition ); }
 	public static function filter_shipping_postcode( $condition ) { return ! self::_postcode_filtering( 'shipping_postcode', $condition ); }
+
+	/**
+	 * City filtering
+	 */
+	public static function city_filtering( $attr, $condition ) {
+		$value = self::_get_order_attr( $attr );
+
+		if ( in_array( $condition['operator'], [ 'is', 'isnot' ], true ) ) {
+			if ( $value !== null ) {
+				$value = trim( strtolower( $value ) );
+
+				if ( isset( $condition['cities'] ) && ! empty( trim( $condition['cities'] ) ) ) {
+					// Convert cities to cleaned array
+					$cities = array_filter( array_map( 'strtolower', array_map( 'wc_clean', explode( "\n", $condition['cities'] ) ) ) );
+
+					// Find matches
+					$matches = [];
+					foreach ( $cities as $city ) {
+						if ( strpos( $city, '*' ) !== false ) {
+							if ( fnmatch( $city, $value ) ) {
+								$matches[] = $city;
+							}
+						} else {
+							if ( $city === $value ) {
+								$matches[] = $city;
+							}
+						}
+					}
+
+					// If there were any matches, city passes the condition
+					if ( $condition['operator'] === 'is' ) {
+						return ! empty( $matches );
+					} else if ( $condition['operator'] === 'isnot' ) {
+						return empty( $matches );
+					}
+				}
+			}
+		} else {
+			return self::_text_filtering( $attr, $condition );
+		}
+
+		return false;
+	}
 
 	/**
 	 * Filter by billing state
