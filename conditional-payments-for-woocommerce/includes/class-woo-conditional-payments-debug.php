@@ -178,6 +178,11 @@ class Woo_Conditional_Payments_Debug {
       return;
     }
 
+    // Skip empty condition
+    if ( ! isset( $condition['type'] ) || empty( $condition['type'] ) ) {
+      return;
+    }
+
     $desc = $this->translate_condition( $condition );
 
     $this->data['rulesets'][$ruleset_id]['conditions'][$condition_index] = [
@@ -212,6 +217,11 @@ class Woo_Conditional_Payments_Debug {
       return;
     }
 
+    // Skip empty action
+    if ( ! isset( $action['type'] ) || empty( $action['type'] ) ) {
+      return;
+    }
+
     $this->data['rulesets'][$ruleset_id]['actions'][$action_index] = $this->translate_action( $action, $passes );
   }
 
@@ -225,12 +235,14 @@ class Woo_Conditional_Payments_Debug {
       isset( $actions[$action['type']] ) ? $actions[$action['type']]['title'] : __( 'N/A', 'woo-conditional-payments' ),
     ];
 
-    $desc = false;
-    $status = $passes ? 'pass' : 'fail';
+    $note = false;
+    $status = $passes ? 'pass' : 'skip';
+    $label = $passes ? __( 'Run', 'woo-conditional-payments' ) : __( 'Skip', 'woo-conditional-payments' );
 
     switch ( $action['type'] ) {
       case 'disable_payment_methods':
       case 'enable_payment_methods':
+      case 'enable_payment_methods_new':
         $cols['methods'] = implode( ', ', $this->get_payment_method_titles( $action ) );
         break;
       case 'add_fee':
@@ -246,14 +258,16 @@ class Woo_Conditional_Payments_Debug {
     }
 
     if ( ! $passes && $action['type'] === 'enable_payment_methods' ) {
-      $desc = __( 'Payment methods were disabled by "Enable payment methods" because conditions did not pass', 'woo-conditional-payments' );
-      $status = 'notify';
+      $note = __( 'Payment methods were disabled by this action because conditions did not pass', 'woo-conditional-payments' );
+      $status = 'pass';
+      $label = __( 'Run', 'woo-conditional-payments' );
     }
 
     return [
       'cols' => $cols,
-      'desc' => $desc,
-      'status' => $status
+      'label' => $label,
+      'status' => $status,
+      'note' => $note,
     ];
   }
 

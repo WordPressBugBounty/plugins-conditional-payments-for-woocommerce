@@ -499,23 +499,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wcp_action_row_template">
 	<tr valign="top" class="action_row">
 		<td class="wcp-action">
-			<select name="wcp_actions[{{data.index}}][type]" class="wcp_action_type_select">
-				<option value=""><?php echo wcp_esc_html( __( '- Select action - ', 'woo-conditional-payments' ) ); ?></option>
+			<div class="wcp-action-container">
+				<select name="wcp_actions[{{data.index}}][type]" class="wcp_action_type_select">
+					<option value=""><?php echo wcp_esc_html( __( '- Select action - ', 'woo-conditional-payments' ) ); ?></option>
 
-				<?php foreach ( wcp_get_grouped_actions() as $group_id => $group ) { ?>
-					<optgroup label="<?php echo esc_attr( $group['title'] ); ?>">
-						<?php foreach ( $group['actions'] as $key => $action ) { ?>
-							<option
-								value="<?php echo esc_attr( $key ); ?>"
-								<?php echo ( isset( $action['pro'] ) && $action['pro'] ) ? 'disabled' : ''; ?>
-								<# if ( data.type == '<?php echo esc_js( $key ); ?>' ) { #>selected<# } #>
-							>
-								<?php echo wcp_esc_html( wcp_get_control_title( $action ) ); ?>
-							</option>
-						<?php } ?>
-					</optgroup>
-				<?php } ?>
-			</select>
+					<?php foreach ( wcp_get_grouped_actions() as $group_id => $group ) { ?>
+						<optgroup label="<?php echo esc_attr( $group['title'] ); ?>">
+							<?php foreach ( $group['actions'] as $key => $action ) { ?>
+								<option
+									value="<?php echo esc_attr( $key ); ?>"
+									<?php echo ( isset( $action['pro'] ) && $action['pro'] ) ? 'disabled' : ''; ?>
+									<# if ( data.type == '<?php echo esc_js( $key ); ?>' ) { #>selected<# } #>
+								>
+									<?php echo wcp_esc_html( wcp_get_control_title( $action ) ); ?>
+								</option>
+							<?php } ?>
+						</optgroup>
+					<?php } ?>
+				</select>
+
+				<span class="woocommerce-help-tip wcp-action-help-tip"></span>
+			</div>
 
 			<input type="hidden" name="wcp_actions[{{data.index}}][guid]" value="{{ data.guid }}" />
 		</td>
@@ -562,3 +566,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 	</tr>
 </script>
+
+<div id="wcp-actions-help-modal" style="display:none" title="<?php esc_attr_e( 'Actions', 'woo-conditional-payments' ); ?>">
+    <table class="widefat">
+		<tr>
+            <th><?php esc_html_e( 'Disable payment methods', 'woo-conditional-payments' ); ?></th>
+            <td><?php esc_html_e( 'Disables payment methods when conditions pass', 'woo-conditional-payments' ); ?></td>
+        </tr>
+        <tr>
+            <th><?php esc_html_e( 'Enable payment methods', 'woo-conditional-payments' ); ?></th>
+            <td>
+				<?php esc_html_e( 'Enables payment methods when conditions pass', 'woo-conditional-payments' ); ?>
+				<div class="wcp-action-help">
+					<span class="dashicons dashicons-lightbulb"></span>
+					<?php esc_html_e( 'Use this to re-enable methods that were disabled by an earlier ruleset.', 'woo-conditional-payments' ); ?>
+				</div>
+			</td>
+        </tr>
+        <tr>
+            <th><?php esc_html_e( 'Allow payment methods', 'woo-conditional-payments' ); ?></th>
+            <td>
+				<?php esc_html_e( 'Enables payment methods when conditions pass, disables them when conditions fail.', 'woo-conditional-payments' ); ?>
+				<div class="wcp-action-help">
+					<span class="dashicons dashicons-warning"></span>
+					<?php esc_html_e( 'Avoid using this action in multiple rulesets for the same payment method. Each ruleset will independently toggle availability, which can cause unexpected behavior.', 'woo-conditional-payments' ); ?>
+				</div>
+			</td>
+        </tr>
+    </table>
+</div>

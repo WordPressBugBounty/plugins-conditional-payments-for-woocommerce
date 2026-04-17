@@ -82,7 +82,9 @@ class Woo_Conditional_Payments_Frontend {
           'namespace' => 'woo-conditional-payments',
           'callback' => function( $data ) {
             if ( WC()->session ) {
-              WC()->session->set( 'chosen_payment_method', $data['payment_method'] );
+              $payment_method = isset( $data['payment_method'] ) ? $data['payment_method'] : null;
+
+              WC()->session->set( 'chosen_payment_method', $payment_method );
             }
           }
         ]
@@ -270,6 +272,16 @@ class Woo_Conditional_Payments_Frontend {
               } else {
                 $disable_keys[$key] = true;
                 unset( $enable_keys[$key] );
+              }
+            }
+          }
+        }
+
+        if ( $action['type'] === 'enable_payment_methods_new' ) {
+          if ( $passes ) {
+            foreach ( $gateways as $key => $gateway ) {
+              if ( wcp_method_selected( $key, $action ) ) {
+                unset( $disable_keys[$key] );
               }
             }
           }

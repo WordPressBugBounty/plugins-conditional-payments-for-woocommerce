@@ -4,7 +4,7 @@ Tags: woocommerce payments, conditional payments, payment methods
 Requires at least: 4.5
 Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 3.4.1
+Stable tag: 3.5.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,13 @@ Conditional Payments is installed just like any other WordPress plugin.
 Once the plugin is activated, you can add rulesets in *WooCommerce > Settings > Payments > Conditions*.
 
 == Changelog ==
+
+= 3.5.0 =
+
+* Renamed **Enable payment methods** to **Allow payment methods** and added new **Enable payment methods**. **Allow payment methods** will disable payment methods if conditions do not pass. New **Enable payment methods** will enable payment methods which have been disabled by previous rulesets.
+* Fixed PHP warning for empty conditions in the debug mode
+* Added better input validation for the rulesets
+* Minor bug fixes
 
 = 3.4.1 =
 

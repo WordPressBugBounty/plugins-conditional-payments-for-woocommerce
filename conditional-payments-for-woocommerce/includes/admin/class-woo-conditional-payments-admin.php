@@ -68,7 +68,7 @@ class Woo_Conditional_Payments_Admin {
     wp_enqueue_script(
       'woo-conditional-payments-admin-js',
       WOO_CONDITIONAL_PAYMENTS_URL . 'admin/js/woo-conditional-payments.js',
-      [ 'jquery', 'wp-util', 'jquery-ui-datepicker' ],
+      [ 'jquery', 'wp-util', 'jquery-ui-datepicker', 'jquery-ui-dialog' ],
       WOO_CONDITIONAL_PAYMENTS_ASSETS_VERSION
     );
 
@@ -420,7 +420,7 @@ class Woo_Conditional_Payments_Admin {
 
     $payment_method_actions = array(
       'enable_payment_methods', 'disable_payment_methods',
-      'add_fee'
+      'enable_payment_methods_new', 'add_fee'
     );
 
     $disables = array();

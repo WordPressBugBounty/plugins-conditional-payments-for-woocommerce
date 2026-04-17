@@ -95,6 +95,10 @@
 
 	.value_input {
 		width: 100%;
+
+		&.has-error {
+			border-color: #c92a2a;
+		}
 	}
 
 	select {
@@ -460,6 +464,70 @@ table.wcp-rulesets {
 		}
 	}
 }
+
+.wcp-action-container {
+	flex-direction: row;
+	flex-wrap: nowrap;
+	display: flex;
+	align-items: center;
+
+	select {
+		flex: auto;
+		width: auto;
+		display: block;
+	}
+
+	.wcp-action-help-tip {
+		flex: none;
+		cursor: pointer !important;
+		display: block;
+		margin-top: 0;
+
+		&::after {
+			cursor: pointer !important;
+		}
+	}
+}
+
+.wcp-actions-help-modal-container {
+	.ui-dialog-titlebar {
+		.ui-dialog-titlebar-close {
+			text-indent: -9999px;
+		}
+	}
+
+	#wcp-actions-help-modal {
+		table {
+			border: none;
+		
+			th {
+				font-weight: bold;
+				white-space: nowrap;
+				vertical-align: top;
+			}
+
+			.wcp-action-help {
+				font-style: italic;
+				
+				.dashicons-lightbulb {
+					color: #fab005;
+					font-size: 16px;
+				}
+
+				.dashicons-warning {
+					color: #fab005;
+					font-size: 16px;
+				}
+			}
+		}
+	}
+
+	.ui-dialog-buttonpane button.ui-button {
+		padding: 6px;
+		height: auto;
+	}
+}
+
 
 /**
  * Health check

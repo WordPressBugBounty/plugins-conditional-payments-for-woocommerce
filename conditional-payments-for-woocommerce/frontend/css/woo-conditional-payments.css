@@ -79,6 +79,10 @@
   background: #c92a2a;
 }
 
+#wcp-debug .wcp-debug-result-label.wcp-debug-result-label-skip {
+  background: #495057;
+}
+
 #wcp-debug table.wcp-debug-table {
   border: 1px solid #dee2e6;
   margin: 0 0 20px;
@@ -95,4 +99,14 @@
 #wcp-debug table.wcp-debug-table td.align-right,
 #wcp-debug table.wcp-debug-table th.align-right {
   text-align: right;
+}
+
+#wcp-debug .wcp-debug-alert {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  background: url("../img/alert-2.svg") no-repeat top left;
+  background-size: 14px 14px;
+  vertical-align: -3px;
+  margin-right: 5px;
 }

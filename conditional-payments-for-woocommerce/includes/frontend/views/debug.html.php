@@ -96,13 +96,17 @@
 								<td>
 									<?php echo esc_html( implode( ' - ', $action['cols'] ) ); ?>
 
-									<?php if ( $action['desc'] ) { ?>
-										<br><small><?php echo esc_html( $action['desc'] ); ?></small>
+									<?php if ( $action['note'] ) { ?>
+										<br><span class="wcp-debug-alert"></span><small><?php echo esc_html( $action['note'] ); ?></small>
 									<?php } ?>
 								</td>
 								<td class="align-right">
+									<?php if ( $action['note'] ) { ?>
+										<span class="wcp-debug-alert"></span>
+									<?php } ?>
+
 									<span class="wcp-debug-result-label wcp-debug-result-label-<?php echo esc_attr( $action['status'] ); ?>">
-										<?php echo esc_html( ( $action['status'] === 'pass' ? __( 'Run', 'woo-conditional-payments' ) : __( 'Fail', 'woo-conditional-payments' ) ) ); ?>
+										<?php echo esc_html( $action['label'] ); ?>
 									</span>
 								</td>
 							</tr>

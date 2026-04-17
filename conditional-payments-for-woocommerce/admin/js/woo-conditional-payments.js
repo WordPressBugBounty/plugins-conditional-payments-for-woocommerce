@@ -24,6 +24,7 @@ jQuery(document).ready(function($) {
 			this.initDatepicker();
 			this.insertExisting();
 			this.insertEmpty();
+			this.validateInputs();
 
 			if ( ! this.triggersInit ) {
 				this.triggerFieldUpdates();
@@ -457,6 +458,71 @@ jQuery(document).ready(function($) {
 			});
 		},
 
+		/**
+		 * Validate inputs
+		 */
+		validateInputs: function() {
+			var self = this;
+
+			// Clear previous errors
+			$(document).on('input', 'input.wcp_text_value_input', function () {
+				self.clearInputValidation($(this));
+			});
+			$(document).on('change', '.condition_row select', function () {
+				let row = $(this).closest('tr');
+				self.clearInputValidation($('input.wcp_text_value_input', row));
+			});
+
+			$('form#mainform').on('submit', function(e) {
+				// Check that all fields with "greater than", "less than" etc.
+				// have numerical values EXCEPT date and time
+				let rowElements = [
+					'tr.wcp-operator-gt',
+					'tr.wcp-operator-gte',
+					'tr.wcp-operator-lt',
+					'tr.wcp-operator-lte',
+					'tr.wcp-operator-e',
+				].join(', ');
+				let exclude = [
+					'.wcp-type-date',
+					'.wcp-type-time',
+				].join(', ');
+
+				$(rowElements).each(function () {
+					if ($(this).is(':not(' + exclude + ')')) {
+						let inputEl = $('input.wcp_text_value_input', this);
+
+						if (inputEl.is(':visible')) {
+							let inputValue = inputEl.val();
+							inputValue = inputValue.trim().replace(',', '.');
+
+							if (inputValue === '' || isNaN(inputValue)) {
+								self.markNumericInvalid(inputEl, 'Please enter a number.');
+								e.preventDefault();
+							}
+						}
+					}
+				});
+			});
+		},
+
+		/**
+		 * Mark input as invalid
+		 */
+		markNumericInvalid: function($input, message) {
+			$input.addClass('has-error');
+			$input[0].setCustomValidity(message);
+			$input[0].reportValidity();
+		},
+
+		/**
+		 * Clear input validation
+		 */
+		clearInputValidation: function($input) {
+			$input.removeClass('has-error');
+			$input[0].setCustomValidity('');
+		},
+
 		removeClassStartingWith: function(el, filter) {
 			el.removeClass(function (index, className) {
 				return (className.match(new RegExp("\\S*" + filter + "\\S*", 'g')) || []).join(' ');
@@ -489,6 +555,7 @@ jQuery(document).ready(function($) {
 				this.triggerFieldUpdates();
 				this.triggerAddAction();
 				this.triggerRemoveAction();
+				this.triggerHelpModal();
 
 				this.triggersInit = true;
 			}
@@ -584,6 +651,28 @@ jQuery(document).ready(function($) {
 
 			$( document ).on( 'click', 'button#wcp-add-action', function() {
 				self.addAction( {} );
+			});
+		},
+
+		/**
+		 * Trigger help modal
+		 */
+		triggerHelpModal: function() {
+			$('#wcp-actions-help-modal').dialog({
+				autoOpen: false,
+				modal: true,
+				width: 600,
+				dialogClass: 'wcp-actions-help-modal-container',
+				buttons: { Close: function() { $(this).dialog('close'); } }
+			});
+
+			$('.wcp-action-help-tip').on('click', function(e) {
+				e.preventDefault();
+				$('#wcp-actions-help-modal').dialog('open');
+			});
+
+			$(document).on('click', '.ui-widget-overlay', function() {
+				$('#wcp-actions-help-modal').dialog('close');
 			});
 		},
 

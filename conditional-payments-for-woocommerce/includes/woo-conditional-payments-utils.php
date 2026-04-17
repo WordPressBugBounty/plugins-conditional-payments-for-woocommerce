@@ -425,12 +425,16 @@ function woo_conditional_payments_filter_groups() {
  */
 function woo_conditional_payments_actions() {
   return apply_filters( 'woo_conditional_payments_actions', [
-    'enable_payment_methods' => [
+    'disable_payment_methods' => [
+      'title' => __( 'Disable payment methods', 'woo-conditional-payments' ),
+      'group' => 'availability',
+    ],
+    'enable_payment_methods_new' => [
       'title' => __( 'Enable payment methods', 'woo-conditional-payments' ),
       'group' => 'availability',
     ],
-    'disable_payment_methods' => [
-      'title' => __( 'Disable payment methods', 'woo-conditional-payments' ),
+    'enable_payment_methods' => [
+      'title' => __( 'Allow payment methods', 'woo-conditional-payments' ),
       'group' => 'availability',
     ],
     'add_fee' => [
@@ -543,7 +547,9 @@ function wcp_get_fee_modes() {
   return [
     'fixed' => $currency_symbol,
     'pct' => '% of subtotal',
+    'pct_no_tax' => '% of subtotal excl. tax',
     'pct_total' => '% of total',
+    'pct_total_no_tax' => '% of total excl. tax',
   ];
 }
 
